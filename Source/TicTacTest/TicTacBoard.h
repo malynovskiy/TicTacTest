@@ -21,12 +21,6 @@ public:
 		Invalid
 	};
 
-	enum class Player : int32
-	{
-		Player1,
-		Player2
-	};
-
 	ATicTacBoard();
 
 	UPROPERTY(Category=Grid, EditAnywhere, BlueprintReadOnly)
@@ -49,6 +43,8 @@ private:
 	void CreateBlocks();
 	int32 CheckWinCondition(int32 x, int32 y) const;
 
+	// Array of cells to calculate win condition more efficiently
 	TArray<BoardCell> BoardCells;
-	Player CurrentPlayer = Player::Player1;
+
+	TArray<class ATicTacBlock*> BoardBlocks;
 };

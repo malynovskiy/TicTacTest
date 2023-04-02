@@ -1,5 +1,6 @@
 #include "TicTacBoard.h"
 #include "TicTacBlock.h"
+#include "TicTacPawn.h"
 #include "Components/TextRenderComponent.h"
 #include "Engine/World.h"
 
@@ -24,7 +25,7 @@ void ATicTacBoard::BeginPlay()
 
 	const float GridHalfSize = (Size * BlockSpacing) / 2;
 	FVector CameraLocation = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetCameraLocation();
-	SetActorLocation(CameraLocation);
+	SetActorLocation(FVector(CameraLocation.X, CameraLocation.Y, GetActorLocation().Z));
 
 	CreateBlocks();
 }
@@ -45,23 +46,28 @@ void ATicTacBoard::CreateBlocks()
 		const float XOffset = (index / Size) * BlockSpacing - Size * BlockSpacing / 2 + BlockSpacing / 2;
 		const float YOffset = (index % Size) * BlockSpacing - Size * BlockSpacing / 2 + BlockSpacing / 2;
 
-		return FVector(XOffset, YOffset, 0.f);
+		return FVector(XOffset, YOffset, GetActorLocation().Z);
 	};
 
 	for (int32 i = 0; i < NumBlocks; i++)
 	{
 		const auto location = computeCellLocation(i);
+
 		ATicTacBlock* NewBlock = GetWorld()->SpawnActor<ATicTacBlock>(location, FRotator(0, 0, 0));
 
 		if (NewBlock != nullptr)
 		{
 			NewBlock->OwningGrid = this;
 			NewBlock->SetIndex(i);
+
+      BoardBlocks.Add(NewBlock);
 		}
 	}
 }
 void ATicTacBoard::HandlePlayerMove(int32 index)
 {
+  using Player = ATicTacPawn::Player;
+
   // Check if selected cell is already occupied BoardCells[index]
   if (BoardCells[index] != BoardCell::Empty)
   {
@@ -70,13 +76,26 @@ void ATicTacBoard::HandlePlayerMove(int32 index)
   }
 
   // Update board state with player's move
-  BoardCells[index] = CurrentPlayer == Player::Player1 ? BoardCell::X : BoardCell::O;
 
+  APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+  if (PlayerController == nullptr)
+  {
+    UE_LOG(LogTemp, Error, TEXT("PlayerController is null"));
+    return;
+  }
+
+  ATicTacPawn* ticTacPawn = dynamic_cast<ATicTacPawn*>(PlayerController->GetPawn());
+  if (ticTacPawn == nullptr)
+  {
+    UE_LOG(LogTemp, Error, TEXT("ATicTacPawn is null"));
+    return;
+  }
+
+  BoardCells[index] = ticTacPawn->GetCurrentPlayer() == Player::Player1 ? BoardCell::X : BoardCell::O;
 
   //transform 1d index to 2d index  1d index to 2d index
   int32 x = index / Size;
   int32 y = index % Size;
-
 
   const int32 result = CheckWinCondition(x, y);
   FText resultString{};
@@ -89,8 +108,7 @@ void ATicTacBoard::HandlePlayerMove(int32 index)
 
   PlayerText->SetText(resultString);
 
-  // Switch to next player
-  CurrentPlayer = CurrentPlayer == Player::Player1 ? Player::Player2 : Player::Player1;
+  ticTacPawn->SwitchPlayer();
 }
 
 #define CHECK_WIN_CONDITION(countP1, countP2, Size)                         \

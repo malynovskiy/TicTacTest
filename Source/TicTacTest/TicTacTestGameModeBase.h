@@ -13,4 +13,17 @@ class TICTACTEST_API ATicTacTestGameModeBase : public AGameModeBase
 	
 public:
 	ATicTacTestGameModeBase();
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> TicTacGameMenu;
+
+	UFUNCTION(BlueprintCallable, Category = "TicTacTest")
+  void StartNewGame();
+
+  void InitializeGameMenu();
+
+	virtual void BeginPlay() override;
+
+private:
+	class UUserWidget* GameMenu;
 };

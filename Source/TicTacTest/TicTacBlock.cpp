@@ -7,15 +7,17 @@ ATicTacBlock::ATicTacBlock()
 	{
 		ConstructorHelpers::FObjectFinderOptional<UStaticMesh> PlaneMesh;
 		ConstructorHelpers::FObjectFinderOptional<UMaterial> BaseMaterial;
-		ConstructorHelpers::FObjectFinderOptional<UMaterialInstance> FocusedMaterial;
-		ConstructorHelpers::FObjectFinderOptional<UMaterialInstance> X_Material;
-		ConstructorHelpers::FObjectFinderOptional<UMaterialInstance> O_Material;
+    ConstructorHelpers::FObjectFinderOptional<UMaterial> Player1FocusedMaterial;
+    ConstructorHelpers::FObjectFinderOptional<UMaterial> Player2FocusedMaterial;
+		ConstructorHelpers::FObjectFinderOptional<UMaterial> X_Material;
+		ConstructorHelpers::FObjectFinderOptional<UMaterial> O_Material;
 		FConstructorStatics()
-			: PlaneMesh(TEXT("/Game/Puzzle/Meshes/PuzzleCube.PuzzleCube"))
-			, BaseMaterial(TEXT("/Game/Puzzle/Meshes/BaseMaterial.BaseMaterial"))
-			, FocusedMaterial(TEXT("/Game/Puzzle/Meshes/BlueMaterial.BlueMaterial"))
-			, X_Material(TEXT("/Game/Puzzle/Meshes/OrangeMaterial.OrangeMaterial"))
-			, O_Material(TEXT("/Game/Puzzle/Meshes/GreenMaterial.GreenMaterial"))
+			: PlaneMesh(TEXT("/Game/Meshes/Cube.Cube"))
+			, BaseMaterial(TEXT("/Game/Materials/BaseTicTac.BaseTicTac"))
+			, Player1FocusedMaterial(TEXT("/Game/Materials/Player1FocusedTicTacMaterial.Player1FocusedTicTacMaterial"))
+			, Player2FocusedMaterial(TEXT("/Game/Materials/Player2FocusedTicTacMaterial.Player2FocusedTicTacMaterial"))
+			, X_Material(TEXT("/Game/Materials/X_Material.X_Material"))
+			, O_Material(TEXT("/Game/Materials/O_Material.O_Material"))
 		{
 		}
 	};
@@ -29,15 +31,17 @@ ATicTacBlock::ATicTacBlock()
 	BlockMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BlockMesh0"));
 	BlockMesh->SetStaticMesh(ConstructorStatics.PlaneMesh.Get());
 
-	BlockMesh->SetRelativeScale3D(FVector(1.f, 1.f, 0.25f));
+	BlockMesh->SetRelativeScale3D(FVector(2.5f, 2.5f, 2.5f));
   BlockMesh->SetRelativeLocation(FVector(0.f, 0.f, 25.f));
+  BlockMesh->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
 
 	BlockMesh->SetMaterial(0, ConstructorStatics.BaseMaterial.Get());
 	//BlockMesh->SetupAttachment(DummyRoot);
 	BlockMesh->OnClicked.AddDynamic(this, &ATicTacBlock::BlockClicked);
 
 	BaseMaterial = ConstructorStatics.BaseMaterial.Get();
-	FocusedMaterial = ConstructorStatics.FocusedMaterial.Get();
+	Player1FocusedMaterial = ConstructorStatics.Player1FocusedMaterial.Get();
+	Player2FocusedMaterial = ConstructorStatics.Player2FocusedMaterial.Get();
 	X_Material = ConstructorStatics.X_Material.Get();
 	O_Material = ConstructorStatics.O_Material.Get();
 }
@@ -68,11 +72,24 @@ void ATicTacBlock::HandleClicked()
 	
 	bIsActive = true;
 
-	// Change material
-	if (counter++ % 2 == 0)
-		BlockMesh->SetMaterial(0, O_Material);
-	else
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (PlayerController == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("PlayerController is null"));
+		return;
+	}
+
+	ATicTacPawn* ticTacPawn = dynamic_cast<ATicTacPawn*>(PlayerController->GetPawn());
+	if (ticTacPawn == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ATicTacPawn is null"));
+		return;
+	}
+
+	if (ticTacPawn->GetCurrentPlayer() == TicTacTest::Player::Player1)
 		BlockMesh->SetMaterial(0, X_Material);
+	else
+		BlockMesh->SetMaterial(0, O_Material);
 
   if (OwningGrid != nullptr)
   {
@@ -80,13 +97,13 @@ void ATicTacBlock::HandleClicked()
   }
 }
 
-void ATicTacBlock::Highlight(bool bOn)
+void ATicTacBlock::Highlight(bool bOn, TicTacTest::Player currentPlayer)
 {
 	if (bIsActive)
 		return;
 
-	if (bOn)
-		BlockMesh->SetMaterial(0, FocusedMaterial);
-	else
+	if (!bOn)
 		BlockMesh->SetMaterial(0, BaseMaterial);
+	else
+		BlockMesh->SetMaterial(0, currentPlayer == TicTacTest::Player::Player1 ? Player1FocusedMaterial : Player2FocusedMaterial);
 }

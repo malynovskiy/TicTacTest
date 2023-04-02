@@ -7,5 +7,5 @@ ATicTacController::ATicTacController()
 {
 	bShowMouseCursor = true;
 	bEnableClickEvents = true;
-	DefaultMouseCursor = EMouseCursor::GrabHand;
+	DefaultMouseCursor = EMouseCursor::Crosshairs;
 }

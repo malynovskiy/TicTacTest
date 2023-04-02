@@ -2,7 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "TicTacPawn.h"
 #include "TicTacBlock.generated.h"
+
 
 UCLASS()
 class TICTACTEST_API ATicTacBlock : public AActor
@@ -12,7 +14,7 @@ class TICTACTEST_API ATicTacBlock : public AActor
 	UPROPERTY(Category = Block, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UStaticMeshComponent* BlockMesh;
 
-public:	
+public:
 	ATicTacBlock();
 
 	bool bIsActive;
@@ -22,15 +24,17 @@ public:
 
 	// Material used on focused blocks
 	UPROPERTY()
-	class UMaterialInstance* FocusedMaterial;
+	class UMaterial* Player1FocusedMaterial;
+	UPROPERTY()
+	class UMaterial* Player2FocusedMaterial;
+
+  UPROPERTY()
+    class UMaterial* X_Material;
 
 	UPROPERTY()
-	class UMaterialInstance* X_Material;
+	class UMaterial* O_Material;
 
-	UPROPERTY()
-	class UMaterialInstance* O_Material;
-
-	// TODO: check whether we need public accesss here
+	// TODO: check whether we need public access here
   UPROPERTY()
   class ATicTacBoard* OwningGrid;
 
@@ -40,7 +44,7 @@ public:
 
 	void HandleClicked();
 
-	void Highlight(bool bOn);
+	void Highlight(bool bOn, TicTacTest::Player currentPlayer);
 
 	void inline SetIndex(int32 i) { index = i; };
 
