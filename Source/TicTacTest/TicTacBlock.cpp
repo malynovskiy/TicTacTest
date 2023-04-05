@@ -7,25 +7,19 @@ ATicTacBlock::ATicTacBlock()
 	{
 		ConstructorHelpers::FObjectFinderOptional<UStaticMesh> PlaneMesh;
 		ConstructorHelpers::FObjectFinderOptional<UMaterial> BaseMaterial;
-    ConstructorHelpers::FObjectFinderOptional<UMaterial> Player1FocusedMaterial;
-    ConstructorHelpers::FObjectFinderOptional<UMaterial> Player2FocusedMaterial;
+    ConstructorHelpers::FObjectFinderOptional<UMaterial> FocusedMaterial;
 		ConstructorHelpers::FObjectFinderOptional<UMaterial> X_Material;
 		ConstructorHelpers::FObjectFinderOptional<UMaterial> O_Material;
 		FConstructorStatics()
 			: PlaneMesh(TEXT("/Game/Meshes/Cube.Cube"))
 			, BaseMaterial(TEXT("/Game/Materials/BaseTicTac.BaseTicTac"))
-			, Player1FocusedMaterial(TEXT("/Game/Materials/Player1FocusedTicTacMaterial.Player1FocusedTicTacMaterial"))
-			, Player2FocusedMaterial(TEXT("/Game/Materials/Player2FocusedTicTacMaterial.Player2FocusedTicTacMaterial"))
+			, FocusedMaterial(TEXT("/Game/Materials/FocusedMaterial.FocusedMaterial"))
 			, X_Material(TEXT("/Game/Materials/X_Material.X_Material"))
 			, O_Material(TEXT("/Game/Materials/O_Material.O_Material"))
 		{
 		}
 	};
 	static FConstructorStatics ConstructorStatics;
-
-	// Create dummy root scene component
-  /*DummyRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Dummy0"));
-  RootComponent = DummyRoot;*/
 
 	// Create static mesh component
 	BlockMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BlockMesh0"));
@@ -36,12 +30,10 @@ ATicTacBlock::ATicTacBlock()
   BlockMesh->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
 
 	BlockMesh->SetMaterial(0, ConstructorStatics.BaseMaterial.Get());
-	//BlockMesh->SetupAttachment(DummyRoot);
 	BlockMesh->OnClicked.AddDynamic(this, &ATicTacBlock::BlockClicked);
 
 	BaseMaterial = ConstructorStatics.BaseMaterial.Get();
-	Player1FocusedMaterial = ConstructorStatics.Player1FocusedMaterial.Get();
-	Player2FocusedMaterial = ConstructorStatics.Player2FocusedMaterial.Get();
+	FocusedMaterial = ConstructorStatics.FocusedMaterial.Get();
 	X_Material = ConstructorStatics.X_Material.Get();
 	O_Material = ConstructorStatics.O_Material.Get();
 }
@@ -71,23 +63,16 @@ void ATicTacBlock::HandleClicked()
 	
 	bIsActive = true;
 
-  APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-  if (PlayerController == nullptr)
-  {
-    UE_LOG(LogTemp, Error, TEXT("PlayerController is null"));
+	ATicTacGameState* gameState = GetWorld()->GetGameState<ATicTacGameState>();
+	if (gameState == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ATicTacGameState is null"));
     return;
-  }
+	}
 
-  ATicTacPawn* ticTacPawn = dynamic_cast<ATicTacPawn*>(PlayerController->GetPawn());
-  if (ticTacPawn == nullptr)
-  {
-    UE_LOG(LogTemp, Error, TEXT("ATicTacPawn is null"));
-    return;
-  }
+	const TicTacTest::EPlayer currentPlayer = gameState->GetCurrentPlayer();
 
-	const TicTacTest::Player currentPlayer = ticTacPawn->GetCurrentPlayer();
-
-	if (currentPlayer == TicTacTest::Player::Player1)
+	if (currentPlayer == TicTacTest::EPlayer::Player1)
 	{
 		BlockMesh->SetMaterial(0, X_Material);
 	}
@@ -98,11 +83,11 @@ void ATicTacBlock::HandleClicked()
 
   if (OwningGrid != nullptr)
   {
-    OwningGrid->HandlePlayerMove(index, currentPlayer);
+    OwningGrid->HandleMove(index, currentPlayer);
   }
 }
 
-void ATicTacBlock::Highlight(bool bOn, TicTacTest::Player currentPlayer)
+void ATicTacBlock::Highlight(bool bOn)
 {
 	if (bIsActive)
 		return;
@@ -110,5 +95,5 @@ void ATicTacBlock::Highlight(bool bOn, TicTacTest::Player currentPlayer)
 	if (!bOn)
 		BlockMesh->SetMaterial(0, BaseMaterial);
 	else
-		BlockMesh->SetMaterial(0, currentPlayer == TicTacTest::Player::Player1 ? Player1FocusedMaterial : Player2FocusedMaterial);
+		BlockMesh->SetMaterial(0, FocusedMaterial);
 }

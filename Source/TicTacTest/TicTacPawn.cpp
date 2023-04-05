@@ -19,14 +19,8 @@ void ATicTacPawn::StartNewGame()
 	Board = GetWorld()->SpawnActor<ATicTacBoard>(FVector(0.f, 0.f, 2900.f), FRotator(0, 90.f, 180.f));
 }
 
-void ATicTacPawn::SwitchPlayer()
+void ATicTacPawn::EndGame()
 {
-	CurrentPlayer = CurrentPlayer == Player::Player1 ? Player::Player2 : Player::Player1;
-}
-
-void ATicTacPawn::EndGame(WinCondition gameResult)
-{
-	OnGameFinished.ExecuteIfBound(gameResult);
 	Board->Destroy();
 }
 
@@ -58,16 +52,16 @@ void ATicTacPawn::TraceForBlock(const FVector& Start, const FVector& End, bool b
 			return;
 		
 		if (CurrentBlockFocus)
-			CurrentBlockFocus->Highlight(false, CurrentPlayer);
+			CurrentBlockFocus->Highlight(false);
 		
 		if (HitBlock)
-			HitBlock->Highlight(true, CurrentPlayer);
+			HitBlock->Highlight(true);
 		
 		CurrentBlockFocus = HitBlock;
 	}
 	else if (CurrentBlockFocus)
 	{
-		CurrentBlockFocus->Highlight(false, CurrentPlayer);
+		CurrentBlockFocus->Highlight(false);
 		CurrentBlockFocus = nullptr;
 	}
 }

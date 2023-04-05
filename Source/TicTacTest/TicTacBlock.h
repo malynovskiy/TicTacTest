@@ -22,14 +22,11 @@ public:
 	UPROPERTY()
 	class UMaterial* BaseMaterial;
 
-	// Material used on focused blocks
 	UPROPERTY()
-	class UMaterial* Player1FocusedMaterial;
-	UPROPERTY()
-	class UMaterial* Player2FocusedMaterial;
+	class UMaterial* FocusedMaterial;
 
   UPROPERTY()
-    class UMaterial* X_Material;
+  class UMaterial* X_Material;
 
 	UPROPERTY()
 	class UMaterial* O_Material;
@@ -44,9 +41,9 @@ public:
 
 	void HandleClicked();
 
-	void Highlight(bool bOn, TicTacTest::Player currentPlayer);
+	void Highlight(bool bOn);
 
-	void inline SetIndex(int32 i) { index = i; };
+	inline void SetIndex(int32 i) { index = i; };
 
 protected:
 	virtual void BeginPlay() override;

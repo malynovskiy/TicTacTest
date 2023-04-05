@@ -1,7 +1,7 @@
 #pragma once
 
 #include "TicTacPawn.h"
-
+#include "TicTacGameState.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "TicTacBoard.generated.h"
@@ -14,15 +14,23 @@ class TICTACTEST_API ATicTacBoard : public AActor
 	UPROPERTY(Category = Grid, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UTextRenderComponent* PlayerText;
 
-	using Player = TicTacTest::Player;
-	using WinCondition = TicTacTest::WinCondition;
+  using EPlayer = TicTacTest::EPlayer;
+  using EGameState = TicTacTest::EGameState;
 
 public:
-	enum class BoardCell : int32
+	enum class ECell : int8
 	{
 		Empty,
 		X,
 		O
+	};
+
+	enum class EWinCondition : int8
+	{
+		NoWin,
+		Player1Win,
+		Player2Win,
+		Draw
 	};
 
 	ATicTacBoard();
@@ -42,20 +50,21 @@ public:
 
 	void MakeAIMove();
 
-	void HandlePlayerMove(int32 blockIndex, Player player);
+	void HandleMove(int32 blockIndex, EPlayer player);
 	TArray<int32> GetEmptyCells() const;
 
 	FORCEINLINE class UTextRenderComponent* GetPlayerText() const { return PlayerText; }
 
 private:
 	void CreateBlocks();
-	WinCondition CheckWinCondition(int32 x, int32 y) const;
+	EWinCondition CheckWinCondition(int32 x, int32 y) const;
 	bool CheckDrawCondition() const;
 
 	// Array of cells to calculate win condition more efficiently
-	TArray<BoardCell> BoardCells;
+	TArray<ECell> BoardCells;
 
 	TArray<class ATicTacBlock*> BoardBlocks;
 
 	class ATicTacPawn* OwningPawn;
+	class ATicTacGameState* GameState;
 };

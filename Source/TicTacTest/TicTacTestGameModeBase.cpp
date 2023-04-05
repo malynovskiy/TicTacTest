@@ -10,6 +10,7 @@ ATicTacTestGameModeBase::ATicTacTestGameModeBase()
 {
 	DefaultPawnClass = ATicTacPawn::StaticClass();
 	PlayerControllerClass = ATicTacController::StaticClass();  
+  GameStateClass = ATicTacGameState::StaticClass();
 }
 
 void ATicTacTestGameModeBase::BeginPlay()
@@ -17,13 +18,14 @@ void ATicTacTestGameModeBase::BeginPlay()
   Super::BeginPlay();
   InitializeGameMenus();
 
-  APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-  TicTacPawn = dynamic_cast<ATicTacPawn*>(PlayerController->GetPawn());
-
-  if (TicTacPawn)
+  ATicTacGameState* gameState = GetWorld()->GetGameState<ATicTacGameState>();
+  if (gameState == nullptr)
   {
-    TicTacPawn->OnGameFinished.BindUObject(this, &ATicTacTestGameModeBase::OnGameFinished);
+    UE_LOG(LogTemp, Error, TEXT("ATicTacGameState is null"));
+    return;
   }
+
+  gameState->OnGameFinished.BindUObject(this, &ATicTacTestGameModeBase::OnGameFinished);
 }
 
 void ATicTacTestGameModeBase::InitializeGameMenus()
@@ -71,7 +73,7 @@ inline void ATicTacTestGameModeBase::HideGameMenu(UUserWidget* gameMenu)
   }
 }
 
-void ATicTacTestGameModeBase::OnGameFinished(WinCondition gameResult)
+void ATicTacTestGameModeBase::OnGameFinished(EGameState gameResult)
 {
   if (EndGameMenu == nullptr && !EndGameMenu->GetIsEnabled())
   {
@@ -85,11 +87,11 @@ void ATicTacTestGameModeBase::OnGameFinished(WinCondition gameResult)
   // Set the text of the GameResult variable based on the game result
   if (GameResultText != nullptr)
   {
-    if (gameResult == WinCondition::Player1Win)
+    if (gameResult == EGameState::Player1Win)
     {
       GameResultText->SetText(FText::FromString("Player 1 win!"));
     }
-    else if (gameResult == WinCondition::Player2Win)
+    else if (gameResult == EGameState::Player2Win)
     {
       GameResultText->SetText(FText::FromString("Player 2 win!"));
     }

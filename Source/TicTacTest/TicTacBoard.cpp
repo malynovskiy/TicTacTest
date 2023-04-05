@@ -5,12 +5,18 @@
 
 #define LOCTEXT_NAMESPACE "TicTacBoard"
 
+#define CHECK_WIN_CONDITION(countP1, countP2, Size)                         \
+  if (countP1 == Size || countP2 == Size)                                   \
+  {                                                                         \
+    return countP1 == Size ? EWinCondition::Player1Win : EWinCondition::Player2Win; \
+  }
+
 ATicTacBoard::ATicTacBoard()
 {
   PlayerText = CreateDefaultSubobject<UTextRenderComponent>(TEXT("ScoreText0"));
   PlayerText->SetText(FText::Format(LOCTEXT("ScoreFmt", "Score: {0}"), FText::AsNumber(0)));
 
-  BoardCells.Init(BoardCell::Empty, Size * Size);
+  BoardCells.Init(ECell::Empty, Size * Size);
 }
 
 void ATicTacBoard::BeginPlay()
@@ -28,6 +34,13 @@ void ATicTacBoard::BeginPlay()
   if (OwningPawn == nullptr)
   {
     UE_LOG(LogTemp, Error, TEXT("OwningPawn is null"));
+    return;
+  }
+
+  GameState = GetWorld()->GetGameState<ATicTacGameState>();
+  if (GameState == nullptr)
+  {
+    UE_LOG(LogTemp, Error, TEXT("ATicTacGameState is null"));
     return;
   }
 
@@ -65,7 +78,7 @@ void ATicTacBoard::CreateBlocks()
 {
   // Number of blocks
   const int32 NumBlocks = Size * Size;
-  BoardCells.Init(BoardCell::Empty, NumBlocks);
+  BoardCells.Init(ECell::Empty, NumBlocks);
 
   const auto computeCellLocation = [this](int32 index) -> FVector
   {
@@ -90,49 +103,50 @@ void ATicTacBoard::CreateBlocks()
     }
   }
 }
-void ATicTacBoard::HandlePlayerMove(int32 index, Player player)
+void ATicTacBoard::HandleMove(int32 index, EPlayer player)
 {
   // Check if selected cell is already occupied BoardCells[index]
-  if (BoardCells[index] != BoardCell::Empty)
+  if (BoardCells[index] != ECell::Empty)
   {
     UE_LOG(LogTemp, Display, TEXT("Selected cell is already occupied by %d"), BoardCells[index]);
     return;
   }
 
-  BoardCells[index] = player == Player::Player1 ? BoardCell::X : BoardCell::O;
+  BoardCells[index] = player == EPlayer::Player1 ? ECell::X : ECell::O;
 
   //transform 1d index to 2d indices
   const int32 x = index / Size;
   const int32 y = index % Size;
 
-  WinCondition result = CheckWinCondition(x, y);
+  EWinCondition winCondition = CheckWinCondition(x, y);
 
-  if (result == WinCondition::NoWin)
+  if (winCondition == EWinCondition::NoWin)
   {
     if (CheckDrawCondition())
     {
-      result = WinCondition::Draw;
+      winCondition = EWinCondition::Draw;
     }
     else
     {
       // No win, next player turn
-      if (OwningPawn != nullptr)
-        OwningPawn->SwitchPlayer();
+      GameState->SwitchPlayer();
       return;
     }
   }
 
   // Game over condition
   FText resultString{};
-  if (result == WinCondition::Player1Win)
+  EGameState gameState = EGameState::NoWin;
+  if (winCondition == EWinCondition::Player1Win)
     resultString = FText::Format(LOCTEXT("ScoreFmt", "Player 1 wins! Score: {0}"), FText::AsNumber(0));
-  else if (result == WinCondition::Player2Win)
+  else if (winCondition == EWinCondition::Player2Win)
     resultString = FText::Format(LOCTEXT("ScoreFmt", "Player 2 wins! Score: {0}"), FText::AsNumber(0));
-  else if (result == WinCondition::Draw)
+  else if (winCondition == EWinCondition::Draw)
     resultString = FText::FromString("Draw!");
 
-  OwningPawn->EndGame(result);
-  return;
+  gameState = static_cast<EGameState>(winCondition);
+  GameState->SetGameState(gameState);
+  OwningPawn->EndGame();
 }
 
 TArray<int32> ATicTacBoard::GetEmptyCells() const
@@ -140,27 +154,21 @@ TArray<int32> ATicTacBoard::GetEmptyCells() const
   TArray<int32> EmptyCells;
   for (int32 i = 0; i < BoardCells.Num(); i++)
   {
-    if (BoardCells[i] == BoardCell::Empty)
+    if (BoardCells[i] == ECell::Empty)
       EmptyCells.Add(i);
   }
   return EmptyCells;
 }
 
-#define CHECK_WIN_CONDITION(countP1, countP2, Size)                         \
-  if (countP1 == Size || countP2 == Size)                                   \
-  {                                                                         \
-    return countP1 == Size ? ATicTacBoard::WinCondition::Player1Win : ATicTacBoard::WinCondition::Player2Win; \
-  }
-
-ATicTacBoard::WinCondition ATicTacBoard::CheckWinCondition(int32 x, int32 y) const
+ATicTacBoard::EWinCondition ATicTacBoard::CheckWinCondition(int32 x, int32 y) const
 {
   int32 countP1 = 0;
   int32 countP2 = 0;
 
-  auto updateWinCounter = [&countP1, &countP2](BoardCell cell) {
-    if (cell == BoardCell::X)
+  auto updateWinCounter = [&countP1, &countP2](ECell cell) {
+    if (cell == ECell::X)
       countP1++;
-    else if (cell == BoardCell::O)
+    else if (cell == ECell::O)
       countP2++;
   };
 
@@ -203,14 +211,14 @@ ATicTacBoard::WinCondition ATicTacBoard::CheckWinCondition(int32 x, int32 y) con
   CHECK_WIN_CONDITION(countP1, countP2, Size);
 
   // No win condition found
-  return ATicTacBoard::WinCondition::NoWin;
+  return EWinCondition::NoWin;
 }
 
 bool ATicTacBoard::CheckDrawCondition() const
 {
   for (int i = 0; i < Size * Size; i++)
   {
-    if (BoardCells[i] == BoardCell::Empty)
+    if (BoardCells[i] == ECell::Empty)
       return false;
   }
   return true;

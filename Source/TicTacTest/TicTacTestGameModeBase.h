@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "TicTacPawn.h"
+#include "TicTacGameState.h"
 #include "TicTacTestGameModeBase.generated.h"
 
 UCLASS()
@@ -13,7 +13,7 @@ class TICTACTEST_API ATicTacTestGameModeBase : public AGameModeBase
 	GENERATED_BODY()
 	
 public:
-	using WinCondition = TicTacTest::WinCondition;
+	using EGameState = TicTacTest::EGameState;
 
 	ATicTacTestGameModeBase();
 
@@ -37,9 +37,7 @@ private:
   inline void ShowGameMenu(class UUserWidget* gameMenu);
   inline void HideGameMenu(class UUserWidget* gameMenu);
 
-	void OnGameFinished(WinCondition gameResult);
-
-	ATicTacPawn* TicTacPawn;
+	void OnGameFinished(EGameState gameState);
 
 	class UUserWidget* MainGameMenu;
 	class UUserWidget* EndGameMenu;
