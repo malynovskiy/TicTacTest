@@ -65,35 +65,40 @@ void ATicTacBlock::BlockClicked(UPrimitiveComponent* ClickedComp, FKey ButtonCli
 
 void ATicTacBlock::HandleClicked()
 {
-	static int32 counter = 0;
-	
+	// prevent clicking on already occupied blocks
 	if (bIsActive)
 		return;
 	
 	bIsActive = true;
 
-	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	if (PlayerController == nullptr)
-	{
-		UE_LOG(LogTemp, Error, TEXT("PlayerController is null"));
-		return;
-	}
+  APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+  if (PlayerController == nullptr)
+  {
+    UE_LOG(LogTemp, Error, TEXT("PlayerController is null"));
+    return;
+  }
 
-	ATicTacPawn* ticTacPawn = dynamic_cast<ATicTacPawn*>(PlayerController->GetPawn());
-	if (ticTacPawn == nullptr)
-	{
-		UE_LOG(LogTemp, Error, TEXT("ATicTacPawn is null"));
-		return;
-	}
+  ATicTacPawn* ticTacPawn = dynamic_cast<ATicTacPawn*>(PlayerController->GetPawn());
+  if (ticTacPawn == nullptr)
+  {
+    UE_LOG(LogTemp, Error, TEXT("ATicTacPawn is null"));
+    return;
+  }
 
-	if (ticTacPawn->GetCurrentPlayer() == TicTacTest::Player::Player1)
+	const TicTacTest::Player currentPlayer = ticTacPawn->GetCurrentPlayer();
+
+	if (currentPlayer == TicTacTest::Player::Player1)
+	{
 		BlockMesh->SetMaterial(0, X_Material);
+	}
 	else
+	{
 		BlockMesh->SetMaterial(0, O_Material);
+	}
 
   if (OwningGrid != nullptr)
   {
-    OwningGrid->HandlePlayerMove(index);
+    OwningGrid->HandlePlayerMove(index, currentPlayer);
   }
 }
 

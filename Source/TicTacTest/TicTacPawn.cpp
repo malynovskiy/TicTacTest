@@ -7,11 +7,6 @@ ATicTacPawn::ATicTacPawn()
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
 
-void ATicTacPawn::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
 void ATicTacPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -24,14 +19,15 @@ void ATicTacPawn::StartNewGame()
 	Board = GetWorld()->SpawnActor<ATicTacBoard>(FVector(0.f, 0.f, 2900.f), FRotator(0, 90.f, 180.f));
 }
 
-void ATicTacPawn::QuitGame()
-{
-
-}
-
 void ATicTacPawn::SwitchPlayer()
 {
 	CurrentPlayer = CurrentPlayer == Player::Player1 ? Player::Player2 : Player::Player1;
+}
+
+void ATicTacPawn::EndGame(WinCondition gameResult)
+{
+	OnGameFinished.ExecuteIfBound(gameResult);
+	Board->Destroy();
 }
 
 void ATicTacPawn::Tick(float DeltaTime)
@@ -58,18 +54,16 @@ void ATicTacPawn::TraceForBlock(const FVector& Start, const FVector& End, bool b
 	if (HitResult.HitObjectHandle.IsValid())
 	{
 		ATicTacBlock* HitBlock = Cast<ATicTacBlock>(HitResult.GetActor());
-		if (CurrentBlockFocus != HitBlock)
-		{
-			if (CurrentBlockFocus)
-			{
-				CurrentBlockFocus->Highlight(false, CurrentPlayer);
-			}
-			if (HitBlock)
-			{
-				HitBlock->Highlight(true, CurrentPlayer);
-			}
-			CurrentBlockFocus = HitBlock;
-		}
+		if (CurrentBlockFocus == HitBlock)
+			return;
+		
+		if (CurrentBlockFocus)
+			CurrentBlockFocus->Highlight(false, CurrentPlayer);
+		
+		if (HitBlock)
+			HitBlock->Highlight(true, CurrentPlayer);
+		
+		CurrentBlockFocus = HitBlock;
 	}
 	else if (CurrentBlockFocus)
 	{

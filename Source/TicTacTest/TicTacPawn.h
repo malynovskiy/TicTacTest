@@ -11,33 +11,44 @@ namespace TicTacTest
 		Player1,
 		Player2
 	};
+
+	enum class WinCondition : int32
+	{
+    NoWin,
+    Player1Win,
+    Player2Win,
+    Draw
+  };
 }
+
+DECLARE_DELEGATE_OneParam(FOnGameFinished, TicTacTest::WinCondition);
 
 UCLASS()
 class TICTACTEST_API ATicTacPawn : public APawn
 {
 	GENERATED_BODY()
 
-public:
 	using Player = TicTacTest::Player;
+	using WinCondition = TicTacTest::WinCondition;
+
+public:
 
 	ATicTacPawn();
 
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UFUNCTION(BlueprintCallable, Category = "TicTacTest")
-  void StartNewGame();
+  	FOnGameFinished OnGameFinished;
 
 	UFUNCTION(BlueprintCallable, Category = "TicTacTest")
-  void QuitGame();
+  	void StartNewGame();
 
+	void EndGame(WinCondition gameResult);
+	
 	Player GetCurrentPlayer() const { return CurrentPlayer; }
-
 	void SwitchPlayer();
 
 protected:
-	virtual void BeginPlay() override;
 
 	void TriggerClick();
 	void TraceForBlock(const FVector& Start, const FVector& End, bool bDrawDebugHelpers);

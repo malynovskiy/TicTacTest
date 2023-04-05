@@ -1,9 +1,10 @@
 
 #include "TicTacTestGameModeBase.h"
-#include "TicTacPawn.h"
+#include "TicTacBoard.h"
 #include "TicTacController.h"
 
 #include "Blueprint/UserWidget.h"
+#include "UMG.h"
 
 ATicTacTestGameModeBase::ATicTacTestGameModeBase()
 {
@@ -14,34 +15,89 @@ ATicTacTestGameModeBase::ATicTacTestGameModeBase()
 void ATicTacTestGameModeBase::BeginPlay()
 {
   Super::BeginPlay();
-  InitializeGameMenu();
-}
+  InitializeGameMenus();
 
-void ATicTacTestGameModeBase::StartNewGame()
-{
-  if (TicTacGameMenu == nullptr)
-  {
-    UE_LOG(LogTemp, Display, TEXT("TicTacGameMenu is not initialized!"));
-    return;
-  }
+  APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+  TicTacPawn = dynamic_cast<ATicTacPawn*>(PlayerController->GetPawn());
 
-  if (GameMenu && GameMenu->IsInViewport())
+  if (TicTacPawn)
   {
-    GameMenu->RemoveFromViewport();
+    TicTacPawn->OnGameFinished.BindUObject(this, &ATicTacTestGameModeBase::OnGameFinished);
   }
 }
 
-void ATicTacTestGameModeBase::InitializeGameMenu()
+void ATicTacTestGameModeBase::InitializeGameMenus()
 {
-  if (TicTacGameMenu == nullptr)
+  check(TicTacStartGameMenu != nullptr || TicTacEndGameMenu != nullptr);
+  if (TicTacStartGameMenu == nullptr || TicTacEndGameMenu == nullptr)
   {
     UE_LOG(LogTemp, Display, TEXT("TicTacGameMenu is not initialized!"));
     return;
   }
   
-  GameMenu = CreateWidget<UUserWidget>(GetWorld(), TicTacGameMenu);
-  if (GameMenu != nullptr)
+  MainGameMenu = CreateWidget<UUserWidget>(GetWorld(), TicTacStartGameMenu);
+  MainGameMenu->AddToPlayerScreen();
+
+  EndGameMenu = CreateWidget<UUserWidget>(GetWorld(), TicTacEndGameMenu);
+  EndGameMenu->AddToPlayerScreen();
+
+  HideGameMenu(EndGameMenu);
+}
+
+void ATicTacTestGameModeBase::StartNewGame()
+{
+  HideGameMenu(MainGameMenu);
+}
+
+void ATicTacTestGameModeBase::RestartGameMenus()
+{
+  HideGameMenu(EndGameMenu);
+  ShowGameMenu(MainGameMenu);
+}
+
+inline void ATicTacTestGameModeBase::ShowGameMenu(UUserWidget* gameMenu)
+{
+  if (gameMenu != nullptr && !gameMenu->IsVisible())
   {
-    GameMenu->AddToViewport();
+    gameMenu->SetVisibility(ESlateVisibility::Visible);
   }
+}
+
+inline void ATicTacTestGameModeBase::HideGameMenu(UUserWidget* gameMenu)
+{
+  if (gameMenu != nullptr && gameMenu->IsVisible())
+  {
+    gameMenu->SetVisibility(ESlateVisibility::Hidden);
+  }
+}
+
+void ATicTacTestGameModeBase::OnGameFinished(WinCondition gameResult)
+{
+  if (EndGameMenu == nullptr && !EndGameMenu->GetIsEnabled())
+  {
+    UE_LOG(LogTemp, Display, TEXT("TicTacEndGameMenu is nullptr!"));
+    return;
+  }
+
+  // Get a reference to the widget's GameResult variable
+  UTextBlock* GameResultText = Cast<UTextBlock>(EndGameMenu->GetWidgetFromName("GameResultText"));
+
+  // Set the text of the GameResult variable based on the game result
+  if (GameResultText != nullptr)
+  {
+    if (gameResult == WinCondition::Player1Win)
+    {
+      GameResultText->SetText(FText::FromString("Player 1 win!"));
+    }
+    else if (gameResult == WinCondition::Player2Win)
+    {
+      GameResultText->SetText(FText::FromString("Player 2 win!"));
+    }
+    else
+    {
+      GameResultText->SetText(FText::FromString("Draw!"));
+    }
+  }
+
+  ShowGameMenu(EndGameMenu);
 }
