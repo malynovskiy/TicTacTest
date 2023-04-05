@@ -17,7 +17,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintCallable, Category = "TicTacTest")
-  void StartNewGame();
+  void StartNewGame(int32 BoardSize, bool PVEEnabled);
 
 	void EndGame();
 

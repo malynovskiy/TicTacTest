@@ -14,9 +14,10 @@ void ATicTacPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("TriggerClick", EInputEvent::IE_Pressed, this, &ATicTacPawn::TriggerClick);
 }
 
-void ATicTacPawn::StartNewGame()
+void ATicTacPawn::StartNewGame(int32 BoardSize, bool PVEEnabled)
 {
-	Board = GetWorld()->SpawnActor<ATicTacBoard>(FVector(0.f, 0.f, 2900.f), FRotator(0, 90.f, 180.f));
+		Board = GetWorld()->SpawnActor<ATicTacBoard>(FVector(0.f, 0.f, 2900.f), FRotator(0, 90.f, 180.f));
+		Board->Initialize(BoardSize);
 }
 
 void ATicTacPawn::EndGame()

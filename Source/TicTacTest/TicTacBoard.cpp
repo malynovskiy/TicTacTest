@@ -15,8 +15,6 @@ ATicTacBoard::ATicTacBoard()
 {
   PlayerText = CreateDefaultSubobject<UTextRenderComponent>(TEXT("ScoreText0"));
   PlayerText->SetText(FText::Format(LOCTEXT("ScoreFmt", "Score: {0}"), FText::AsNumber(0)));
-
-  BoardCells.Init(ECell::Empty, Size * Size);
 }
 
 void ATicTacBoard::BeginPlay()
@@ -43,13 +41,6 @@ void ATicTacBoard::BeginPlay()
     UE_LOG(LogTemp, Error, TEXT("ATicTacGameState is null"));
     return;
   }
-
-  // Setup location
-  const float GridHalfSize = (Size * BlockSpacing) / 2;
-  FVector CameraLocation = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetCameraLocation();
-  SetActorLocation(FVector(CameraLocation.X, CameraLocation.Y, GetActorLocation().Z));
-
-  CreateBlocks();
 }
 
 void ATicTacBoard::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -69,9 +60,22 @@ void ATicTacBoard::Tick(float DeltaTime)
   Super::Tick(DeltaTime);
 }
 
+void ATicTacBoard::Initialize(const int32 BoardSize /*= 3*/)
+{
+  Size = BoardSize;
+  BoardCells.Init(ECell::Empty, Size * Size);
+
+  // Setup location
+  const float GridHalfSize = (Size * BlockSpacing) / 2;
+  FVector CameraLocation = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetCameraLocation();
+  SetActorLocation(FVector(CameraLocation.X, CameraLocation.Y, GetActorLocation().Z));
+
+  CreateBlocks();
+}
+
 void ATicTacBoard::MakeAIMove()
 {
-
+  //HandleMove(index, EPlayer::Player2);
 }
 
 void ATicTacBoard::CreateBlocks()

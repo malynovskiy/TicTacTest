@@ -48,6 +48,8 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 
+	void Initialize(const int32 BoardSize = 3);
+
 	void MakeAIMove();
 
 	void HandleMove(int32 blockIndex, EPlayer player);
