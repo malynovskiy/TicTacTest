@@ -21,14 +21,7 @@ void ATicTacBoard::BeginPlay()
 {
   Super::BeginPlay();
 
-  APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-  if (PlayerController == nullptr)
-  {
-    UE_LOG(LogTemp, Error, TEXT("PlayerController is null"));
-    return;
-  }
-
-  OwningPawn = dynamic_cast<ATicTacPawn*>(PlayerController->GetPawn());
+  OwningPawn = dynamic_cast<ATicTacPawn*>(GetWorld()->GetFirstPlayerController()->GetPawn());
   if (OwningPawn == nullptr)
   {
     UE_LOG(LogTemp, Error, TEXT("OwningPawn is null"));
@@ -66,7 +59,6 @@ void ATicTacBoard::Initialize(const int32 BoardSize /*= 3*/)
   BoardCells.Init(ECell::Empty, Size * Size);
 
   // Setup location
-  const float GridHalfSize = (Size * BlockSpacing) / 2;
   FVector CameraLocation = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetCameraLocation();
   SetActorLocation(FVector(CameraLocation.X, CameraLocation.Y, GetActorLocation().Z));
 

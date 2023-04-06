@@ -40,6 +40,7 @@ public:
 	void BlockClicked(UPrimitiveComponent* ClickedComp, FKey ButtonClicked);
 
 	void HandleClicked();
+	void HandleClicked(EPlayer player);
 
 	void Highlight(bool bOn);
 

@@ -4,33 +4,29 @@
 #include "GameFramework/GameStateBase.h"
 #include "TicTacGameState.generated.h"
 
-namespace TicTacTest
+UENUM(BlueprintType)
+enum class EPlayer : uint8
 {
-  UENUM(BlueprintType)
-  enum class EPlayer : uint8
-  {
-    Player1,
-    Player2
-  };
+  Player1,
+  Player2
+};
+UENUM(BlueprintType)
+enum class EGameState : uint8
+{
+  NoWin,
+  Player1Win,
+  Player2Win,
+  Draw
+};
 
-  UENUM(BlueprintType)
-  enum class EGameState : uint8
-  {
-    NoWin,
-    Player1Win,
-    Player2Win,
-    Draw
-  };
+UENUM(BlueprintType)
+enum class EGameMode : uint8
+{
+  PVP,
+  PVE
+};
 
-  UENUM(BlueprintType)
-  enum class EGameMode : uint8
-  {
-    PVP,
-    PVE
-  };
-}
-
-DECLARE_DELEGATE_OneParam(FOnGameFinished, TicTacTest::EGameState);
+DECLARE_DELEGATE_OneParam(FOnGameFinished, EGameState);
 
 UCLASS()
 class TICTACTEST_API ATicTacGameState : public AGameStateBase
@@ -38,10 +34,6 @@ class TICTACTEST_API ATicTacGameState : public AGameStateBase
   GENERATED_BODY()
 
 public:
-  using EPlayer = TicTacTest::EPlayer;
-  using EGameState = TicTacTest::EGameState;
-  using EGameMode = TicTacTest::EGameMode;
-
   FOnGameFinished OnGameFinished;
 
   void SwitchPlayer();
@@ -53,18 +45,18 @@ public:
   inline void SetGameMode(EGameMode NewGameMode) { CurrentGameMode = NewGameMode; }
 
   inline EPlayer GetCurrentPlayer() const { return CurrentPlayer; }
-  //inline void SetCurrentPlayer(Player ) { CurrentPlayer; }
+
+  bool IsAITurn() const;
+  bool IsPlayerTurn() const;
 
 private:
   void OnGameStateChanged(EGameState NewGameState);
 
 protected:
-  //UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TicTacTest")
   EPlayer CurrentPlayer = EPlayer::Player1;
 
-  //UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TicTacTest")
   EGameState CurrentGameState = EGameState::NoWin;
 
-  //UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "TicTacTest")
+  UPROPERTY(BlueprintReadWrite, Category = "Gameplay")
   EGameMode CurrentGameMode = EGameMode::PVP;
 };

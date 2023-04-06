@@ -13,8 +13,6 @@ class TICTACTEST_API ATicTacTestGameModeBase : public AGameModeBase
 	GENERATED_BODY()
 	
 public:
-	using EGameState = TicTacTest::EGameState;
-
 	ATicTacTestGameModeBase();
 
 	virtual void BeginPlay() override;

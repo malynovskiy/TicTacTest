@@ -14,9 +14,6 @@ class TICTACTEST_API ATicTacBoard : public AActor
 	UPROPERTY(Category = Grid, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UTextRenderComponent* PlayerText;
 
-  using EPlayer = TicTacTest::EPlayer;
-  using EGameState = TicTacTest::EGameState;
-
 public:
 	enum class ECell : int8
 	{
@@ -54,6 +51,8 @@ public:
 
 	void HandleMove(int32 blockIndex, EPlayer player);
 	TArray<int32> GetEmptyCells() const;
+
+	inline class ATicTacBlock* GetBlock(int32 index) const { return BoardBlocks[index]; }
 
 	FORCEINLINE class UTextRenderComponent* GetPlayerText() const { return PlayerText; }
 

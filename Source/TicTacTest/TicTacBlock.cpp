@@ -70,9 +70,9 @@ void ATicTacBlock::HandleClicked()
     return;
 	}
 
-	const TicTacTest::EPlayer currentPlayer = gameState->GetCurrentPlayer();
+	const EPlayer currentPlayer = gameState->GetCurrentPlayer();
 
-	if (currentPlayer == TicTacTest::EPlayer::Player1)
+	if (currentPlayer == EPlayer::Player1)
 	{
 		BlockMesh->SetMaterial(0, X_Material);
 	}
@@ -85,6 +85,29 @@ void ATicTacBlock::HandleClicked()
   {
     OwningGrid->HandleMove(index, currentPlayer);
   }
+}
+
+void ATicTacBlock::HandleClicked(EPlayer player)
+{
+	// prevent clicking on already occupied blocks
+	if (bIsActive)
+		return;
+
+	bIsActive = true;
+
+	if (player == EPlayer::Player1)
+	{
+		BlockMesh->SetMaterial(0, X_Material);
+	}
+	else
+	{
+		BlockMesh->SetMaterial(0, O_Material);
+	}
+
+	if (OwningGrid != nullptr)
+	{
+		OwningGrid->HandleMove(index, player);
+	}
 }
 
 void ATicTacBlock::Highlight(bool bOn)

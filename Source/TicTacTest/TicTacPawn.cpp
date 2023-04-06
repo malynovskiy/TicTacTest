@@ -1,6 +1,7 @@
 #include "TicTacPawn.h"
 #include "TicTacBlock.h"
 #include "TicTacBoard.h"
+#include "TicTacAI.h"
 
 ATicTacPawn::ATicTacPawn()
 {
@@ -14,14 +15,29 @@ void ATicTacPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("TriggerClick", EInputEvent::IE_Pressed, this, &ATicTacPawn::TriggerClick);
 }
 
-void ATicTacPawn::StartNewGame(int32 BoardSize, bool PVEEnabled)
+void ATicTacPawn::StartNewGame(int32 BoardSize, bool isPVE)
 {
-		Board = GetWorld()->SpawnActor<ATicTacBoard>(FVector(0.f, 0.f, 2900.f), FRotator(0, 90.f, 180.f));
-		Board->Initialize(BoardSize);
+  Board = GetWorld()->SpawnActor<ATicTacBoard>(FVector(0.f, 0.f, 2900.f), FRotator(0, 90.f, 180.f));
+  Board->Initialize(BoardSize);
+	
+	if (ATicTacGameState* gameState = GetWorld()->GetGameState<ATicTacGameState>())
+	{
+		gameState->SetGameMode(isPVE ? EGameMode::PVE : EGameMode::PVP);
+
+		if (isPVE)
+		{
+			AI = GetWorld()->SpawnActor<ATicTacAI>();
+		}
+	}
 }
 
 void ATicTacPawn::EndGame()
 {
+	if (AI)
+	{
+		AI->Destroy();
+	}
+
 	Board->Destroy();
 }
 
@@ -32,7 +48,6 @@ void ATicTacPawn::Tick(float DeltaTime)
 	APlayerController* playerController = Cast<APlayerController>(GetController());
 	if (playerController == nullptr)
 		return;
-
 
 	FVector Start{}, Dir{};
 	playerController->DeprojectMousePositionToWorld(Start, Dir);
@@ -69,6 +84,17 @@ void ATicTacPawn::TraceForBlock(const FVector& Start, const FVector& End, bool b
 
 void ATicTacPawn::TriggerClick()
 {
-	if (CurrentBlockFocus)
-		CurrentBlockFocus->HandleClicked();
+  if (CurrentBlockFocus != nullptr)
+  {
+		ATicTacGameState* gameState = GetWorld()->GetGameState<ATicTacGameState>();
+		if (gameState == nullptr)
+		{
+			UE_LOG(LogTemp, Error, TEXT("ATicTacGameState is null"));
+			return;
+		}
+
+		const EPlayer currentPlayer = gameState->GetCurrentPlayer();
+
+    CurrentBlockFocus->HandleClicked(currentPlayer);
+  }
 }

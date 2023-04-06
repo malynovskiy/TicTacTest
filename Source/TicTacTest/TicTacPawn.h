@@ -17,12 +17,12 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintCallable, Category = "TicTacTest")
-  void StartNewGame(int32 BoardSize, bool PVEEnabled);
-
+  void StartNewGame(int32 BoardSize, bool isPVE);
 	void EndGame();
 
-protected:
+	class ATicTacBoard* GetGameBoard() const { return Board; }
 
+protected:
 	void TriggerClick();
 	void TraceForBlock(const FVector& Start, const FVector& End, bool bDrawDebugHelpers);
 
@@ -30,4 +30,6 @@ protected:
 	class ATicTacBlock* CurrentBlockFocus;
 
 	class ATicTacBoard* Board;
+	class ATicTacAI* AI;
+
 };
