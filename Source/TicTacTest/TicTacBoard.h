@@ -47,9 +47,9 @@ public:
 
 	void Initialize(const int32 BoardSize = 3);
 
-	void MakeAIMove();
-
 	void HandleMove(int32 blockIndex, EPlayer player);
+
+	inline bool IsCellEmpty(int32 index) const { return BoardCells[index] == ECell::Empty; }
 	TArray<int32> GetEmptyCells() const;
 
 	inline class ATicTacBlock* GetBlock(int32 index) const { return BoardBlocks[index]; }

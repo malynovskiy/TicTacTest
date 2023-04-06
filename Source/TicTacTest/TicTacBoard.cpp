@@ -34,6 +34,9 @@ void ATicTacBoard::BeginPlay()
     UE_LOG(LogTemp, Error, TEXT("ATicTacGameState is null"));
     return;
   }
+
+  //PlayerText->SetRelativeLocation(FVector(0.0f, -270.f, 4700.f));
+  //PlayerText->SetRelativeRotation(FRotator(180.0f, 90.0f, 0.0f));
 }
 
 void ATicTacBoard::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -65,11 +68,6 @@ void ATicTacBoard::Initialize(const int32 BoardSize /*= 3*/)
   CreateBlocks();
 }
 
-void ATicTacBoard::MakeAIMove()
-{
-  //HandleMove(index, EPlayer::Player2);
-}
-
 void ATicTacBoard::CreateBlocks()
 {
   // Number of blocks
@@ -99,10 +97,24 @@ void ATicTacBoard::CreateBlocks()
     }
   }
 }
+
+TArray<int32> ATicTacBoard::GetEmptyCells() const
+{
+  TArray<int32> EmptyCells;
+  for (int32 i = 0; i < BoardCells.Num(); i++)
+  {
+    if (IsCellEmpty(i))
+    {
+      EmptyCells.Add(i);
+    }
+  }
+  return EmptyCells;
+}
+
 void ATicTacBoard::HandleMove(int32 index, EPlayer player)
 {
   // Check if selected cell is already occupied BoardCells[index]
-  if (BoardCells[index] != ECell::Empty)
+  if (!IsCellEmpty(index))
   {
     UE_LOG(LogTemp, Display, TEXT("Selected cell is already occupied by %d"), BoardCells[index]);
     return;
@@ -143,17 +155,6 @@ void ATicTacBoard::HandleMove(int32 index, EPlayer player)
   gameState = static_cast<EGameState>(winCondition);
   GameState->SetGameState(gameState);
   OwningPawn->EndGame();
-}
-
-TArray<int32> ATicTacBoard::GetEmptyCells() const
-{
-  TArray<int32> EmptyCells;
-  for (int32 i = 0; i < BoardCells.Num(); i++)
-  {
-    if (BoardCells[i] == ECell::Empty)
-      EmptyCells.Add(i);
-  }
-  return EmptyCells;
 }
 
 ATicTacBoard::EWinCondition ATicTacBoard::CheckWinCondition(int32 x, int32 y) const
