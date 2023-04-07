@@ -13,8 +13,12 @@
 
 ATicTacBoard::ATicTacBoard()
 {
+  DummyRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Dummy0"));
+  RootComponent = DummyRoot;
+
   PlayerText = CreateDefaultSubobject<UTextRenderComponent>(TEXT("ScoreText0"));
   PlayerText->SetText(FText::Format(LOCTEXT("ScoreFmt", "Score: {0}"), FText::AsNumber(0)));
+  PlayerText->SetupAttachment(DummyRoot);
 }
 
 void ATicTacBoard::BeginPlay()
@@ -35,8 +39,8 @@ void ATicTacBoard::BeginPlay()
     return;
   }
 
-  //PlayerText->SetRelativeLocation(FVector(0.0f, -270.f, 4700.f));
-  //PlayerText->SetRelativeRotation(FRotator(180.0f, 90.0f, 0.0f));
+  PlayerText->SetRelativeLocation(FVector(-270.0f, 0.f, -1800.f));
+  PlayerText->SetRelativeRotation(FRotator(90.0f, -180.0f, 0.0f));
 }
 
 void ATicTacBoard::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -90,7 +94,7 @@ void ATicTacBoard::CreateBlocks()
 
     if (NewBlock != nullptr)
     {
-      NewBlock->OwningGrid = this;
+      NewBlock->OwningBoard = this;
       NewBlock->SetIndex(i);
 
       BoardBlocks.Add(NewBlock);
@@ -111,6 +115,66 @@ TArray<int32> ATicTacBoard::GetEmptyCells() const
   return EmptyCells;
 }
 
+bool ATicTacBoard::IsWinningMove(int32 index, EPlayer player) const
+{
+  if (!IsCellEmpty(index))
+    return false;
+
+  TArray<ECell> TestBoard(BoardCells);
+  ECell moveCell = player == EPlayer::Player1 ? ECell::X : ECell::O;
+  TestBoard[index] = moveCell;
+
+  // horizontal condition check
+  for (int32 i = 0; i < Size; i++)
+  {
+    int32 count{};
+
+    for (int j = 0; j < Size; j++)
+    {
+      if (TestBoard[i * Size + j] == moveCell)
+        count++;
+    }
+
+    if (count == Size)
+    {
+      return true;
+    }
+  }
+
+  // vertical condition check
+  for (int32 j = 0; j < Size; j++)
+  {
+    int32 count{};
+
+    for (int i = 0; i < Size; i++)
+      if (TestBoard[i * Size + j] == moveCell)
+        count++;
+
+    if (count == Size)
+      return true;
+  }
+
+  // diagonals check
+  int32 count = 0;
+  for (int32 i = 0; i < Size; i++)
+    if (TestBoard[i * Size + i] == moveCell)
+      count++;
+
+  if (count == Size)
+    return true;
+
+  count = 0;
+  for (int32 i = 0; i < Size; i++)
+    if(TestBoard[i * Size + Size - 1 - i] == moveCell)
+      count++;
+
+  if (count == Size)
+    return true;
+
+  // no winning move
+  return false;
+}
+
 void ATicTacBoard::HandleMove(int32 index, EPlayer player)
 {
   // Check if selected cell is already occupied BoardCells[index]
@@ -122,11 +186,7 @@ void ATicTacBoard::HandleMove(int32 index, EPlayer player)
 
   BoardCells[index] = player == EPlayer::Player1 ? ECell::X : ECell::O;
 
-  //transform 1d index to 2d indices
-  const int32 x = index / Size;
-  const int32 y = index % Size;
-
-  EWinCondition winCondition = CheckWinCondition(x, y);
+  EWinCondition winCondition = CheckWinCondition();
 
   if (winCondition == EWinCondition::NoWin)
   {
@@ -157,7 +217,7 @@ void ATicTacBoard::HandleMove(int32 index, EPlayer player)
   OwningPawn->EndGame();
 }
 
-ATicTacBoard::EWinCondition ATicTacBoard::CheckWinCondition(int32 x, int32 y) const
+ATicTacBoard::EWinCondition ATicTacBoard::CheckWinCondition() const
 {
   int32 countP1 = 0;
   int32 countP2 = 0;

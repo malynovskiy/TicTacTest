@@ -21,6 +21,9 @@ ATicTacBlock::ATicTacBlock()
 	};
 	static FConstructorStatics ConstructorStatics;
 
+	DummyRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Dummy0"));
+	RootComponent = DummyRoot;
+
 	// Create static mesh component
 	BlockMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BlockMesh0"));
 	BlockMesh->SetStaticMesh(ConstructorStatics.PlaneMesh.Get());
@@ -31,6 +34,8 @@ ATicTacBlock::ATicTacBlock()
 
 	BlockMesh->SetMaterial(0, ConstructorStatics.BaseMaterial.Get());
 	BlockMesh->OnClicked.AddDynamic(this, &ATicTacBlock::BlockClicked);
+	
+	BlockMesh->SetupAttachment(DummyRoot);
 
 	BaseMaterial = ConstructorStatics.BaseMaterial.Get();
 	FocusedMaterial = ConstructorStatics.FocusedMaterial.Get();
@@ -81,9 +86,9 @@ void ATicTacBlock::HandleClicked()
 		BlockMesh->SetMaterial(0, O_Material);
 	}
 
-  if (OwningGrid != nullptr)
+  if (OwningBoard != nullptr)
   {
-    OwningGrid->HandleMove(index, currentPlayer);
+    OwningBoard->HandleMove(index, currentPlayer);
   }
 }
 
@@ -104,9 +109,9 @@ void ATicTacBlock::HandleClicked(EPlayer player)
 		BlockMesh->SetMaterial(0, O_Material);
 	}
 
-	if (OwningGrid != nullptr)
+	if (OwningBoard != nullptr)
 	{
-		OwningGrid->HandleMove(index, player);
+		OwningBoard->HandleMove(index, player);
 	}
 }
 

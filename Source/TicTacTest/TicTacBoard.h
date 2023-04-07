@@ -11,6 +11,9 @@ class TICTACTEST_API ATicTacBoard : public AActor
 {
 	GENERATED_BODY()
 
+	UPROPERTY(Category = Block, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class USceneComponent* DummyRoot;
+
 	UPROPERTY(Category = Grid, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UTextRenderComponent* PlayerText;
 
@@ -52,13 +55,16 @@ public:
 	inline bool IsCellEmpty(int32 index) const { return BoardCells[index] == ECell::Empty; }
 	TArray<int32> GetEmptyCells() const;
 
+	bool IsWinningMove(int32 index, EPlayer player) const;
+
 	inline class ATicTacBlock* GetBlock(int32 index) const { return BoardBlocks[index]; }
 
+	FORCEINLINE class USceneComponent* GetDummyRoot() const { return DummyRoot; }
 	FORCEINLINE class UTextRenderComponent* GetPlayerText() const { return PlayerText; }
 
 private:
 	void CreateBlocks();
-	EWinCondition CheckWinCondition(int32 x, int32 y) const;
+	EWinCondition CheckWinCondition() const;
 	bool CheckDrawCondition() const;
 
 	// Array of cells to calculate win condition more efficiently

@@ -11,8 +11,6 @@ ATicTacPawn::ATicTacPawn()
 void ATicTacPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	PlayerInputComponent->BindAction("TriggerClick", EInputEvent::IE_Pressed, this, &ATicTacPawn::TriggerClick);
 }
 
 void ATicTacPawn::StartNewGame(int32 BoardSize, bool isPVE)
@@ -33,7 +31,7 @@ void ATicTacPawn::StartNewGame(int32 BoardSize, bool isPVE)
 
 void ATicTacPawn::EndGame()
 {
-	if (AI)
+	if (AI != nullptr)
 	{
 		AI->Destroy();
 	}
@@ -80,21 +78,4 @@ void ATicTacPawn::TraceForBlock(const FVector& Start, const FVector& End, bool b
 		CurrentBlockFocus->Highlight(false);
 		CurrentBlockFocus = nullptr;
 	}
-}
-
-void ATicTacPawn::TriggerClick()
-{
-  if (CurrentBlockFocus != nullptr)
-  {
-		ATicTacGameState* gameState = GetWorld()->GetGameState<ATicTacGameState>();
-		if (gameState == nullptr)
-		{
-			UE_LOG(LogTemp, Error, TEXT("ATicTacGameState is null"));
-			return;
-		}
-
-		const EPlayer currentPlayer = gameState->GetCurrentPlayer();
-
-    CurrentBlockFocus->HandleClicked(currentPlayer);
-  }
 }

@@ -12,7 +12,10 @@ class TICTACTEST_API ATicTacBlock : public AActor
 	GENERATED_BODY()
 	
 	UPROPERTY(Category = Block, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UStaticMeshComponent* BlockMesh;
+	class USceneComponent* DummyRoot;
+
+	UPROPERTY(Category = Block, VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+  class UStaticMeshComponent* BlockMesh;
 
 public:
 	ATicTacBlock();
@@ -33,7 +36,7 @@ public:
 
 	// TODO: check whether we need public access here
   UPROPERTY()
-  class ATicTacBoard* OwningGrid;
+  class ATicTacBoard* OwningBoard;
 
 public:
 	UFUNCTION()
@@ -52,6 +55,7 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 
+	FORCEINLINE class USceneComponent* GetDummyRoot() const { return DummyRoot; }
 	FORCEINLINE class UStaticMeshComponent* GetBlockMesh() const { return BlockMesh; }
 
 private:

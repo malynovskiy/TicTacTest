@@ -20,15 +20,10 @@ void ATicTacAI::BeginPlay()
 
   float CheckInterval = 1.0f;
   FTimerHandle TimerHandle;
-  GetWorldTimerManager().SetTimer(TimerHandle, this, &ATicTacAI::CheckTurn, CheckInterval, true);
+  GetWorldTimerManager().SetTimer(TimerHandle, this, &ATicTacAI::CheckTurnAndMove, CheckInterval, true);
 }
 
-void ATicTacAI::Tick(float DeltaTime)
-{
-  Super::Tick(DeltaTime);
-}
-
-int32 ATicTacAI::ComputeNextMove(TArray<int32> possibleMoves)
+int32 ATicTacAI::GetRandMove(TArray<int32> possibleMoves)
 {
   if (possibleMoves.Num() == 0)
   {
@@ -43,27 +38,50 @@ int32 ATicTacAI::ComputeNextMove(TArray<int32> possibleMoves)
   return possibleMoves[RandomIndex];
 }
 
-void ATicTacAI::CheckTurn()
+void ATicTacAI::CheckTurnAndMove()
 {
-  if (BlockToMove == nullptr && GameState && GameState->IsAITurn())
-  {
-    const int32 cellIndex = ComputeNextMove(GameBoard->GetEmptyCells());
+  if (BlockToMove != nullptr || GameState == nullptr || !GameState->IsAITurn())
+    return;
 
-    BlockToMove = GameBoard->GetBlock(cellIndex);
-    BlockToMove->Highlight(true);
+  const int32 cellIndex = GetNextMove();
+  BlockToMove = GameBoard->GetBlock(cellIndex);
+  BlockToMove->Highlight(true);
 
-    float moveDelay = 1.0f;
-    FTimerHandle TimerHandle;
-    GetWorldTimerManager().SetTimer(TimerHandle, this, &ATicTacAI::MakeMove, moveDelay, false);
-  }
+  float moveDelay = 1.0f;
+  FTimerHandle TimerHandle;
+  GetWorldTimerManager().SetTimer(TimerHandle, this, &ATicTacAI::MakeMove, moveDelay, false);
 }
 
 void ATicTacAI::MakeMove()
 {
-  if (BlockToMove != nullptr)
+  if (BlockToMove == nullptr)
+    return;
+
+  BlockToMove->HandleClicked(EPlayer::Player2);
+  BlockToMove = nullptr;
+}
+
+int32 ATicTacAI::GetNextMove()
+{
+  int32 index = 0;
+
+  // Find a winning move or a blocking move
+  for (int32 i = 0; i < GameBoard->Size; ++i)
   {
-    BlockToMove->HandleClicked(EPlayer::Player2);
-    BlockToMove = nullptr;
+    for (int32 j = 0; j < GameBoard->Size; ++j)
+    {
+      index = i * GameBoard->Size + j;
+      if (!GameBoard->IsCellEmpty(index))
+        continue;
+
+      if (GameBoard->IsWinningMove(index, EPlayer::Player2))
+        return index;
+
+      if (GameBoard->IsWinningMove(index, EPlayer::Player1))
+        return index;
+    }
   }
+
+  return GetRandMove(GameBoard->GetEmptyCells());
 }
 

@@ -13,18 +13,15 @@ class TICTACTEST_API ATicTacAI : public AActor
 public:
 	ATicTacAI();
 
-
 protected:
 	virtual void BeginPlay() override;
 
-public:
-	virtual void Tick(float DeltaTime) override;
-
-	int32 ComputeNextMove(TArray<int32> possibleMoves);
-
 private:
-	void CheckTurn();
+	void CheckTurnAndMove();
 	void MakeMove();
+
+	int32 GetRandMove(TArray<int32> possibleMoves);
+	int32 GetNextMove();
 
 	ATicTacGameState* GameState = nullptr;
 	class ATicTacBoard* GameBoard = nullptr;
