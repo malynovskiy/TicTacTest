@@ -15,7 +15,7 @@ void ATicTacPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 void ATicTacPawn::StartNewGame(int32 BoardSize, bool isPVE)
 {
-  Board = GetWorld()->SpawnActor<ATicTacBoard>(FVector(0.f, 0.f, 2900.f), FRotator(0, 90.f, 180.f));
+  Board = GetWorld()->SpawnActor<ATicTacBoard>(FVector(0.f, 0.f, -140.f), FRotator(0, 90.f, 180.f));
   Board->Initialize(BoardSize);
 	
 	if (ATicTacGameState* gameState = GetWorld()->GetGameState<ATicTacGameState>())
@@ -41,6 +41,7 @@ void ATicTacPawn::EndGame()
 	{
 		AIChiki->Destroy();
 	}
+
 	if (AIBriki != nullptr)
 	{
 		AIBriki->Destroy();
