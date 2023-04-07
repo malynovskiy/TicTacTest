@@ -26,37 +26,36 @@ void ATicTacPawn::StartNewGame(int32 BoardSize, bool isPVE, bool AIsimulation)
 
 	if (isPVE)
 	{
-		AIChiki = GetWorld()->SpawnActor<ATicTacAI>();
-		AIChiki->SetGameBoard(Board);
-		AIChiki->SetPlayer(EPlayer::Player2);
+		AIChicky = GetWorld()->SpawnActor<ATicTacAI>();
+		AIChicky->SetGameBoard(Board);
+		AIChicky->SetPlayer(EPlayer::Player2);
 
 		if (AIsimulation)
 		{
-			AIBriki = GetWorld()->SpawnActor<ATicTacAI>();
-			AIBriki->SetGameBoard(Board);
-			AIBriki->SetPlayer(EPlayer::Player1);
-			AIBriki->SetMoveDelay(2.0f);
+			AIBricky = GetWorld()->SpawnActor<ATicTacAI>();
+			AIBricky->SetGameBoard(Board);
+			AIBricky->SetPlayer(EPlayer::Player1);
+			AIBricky->SetMoveDelay(2.0f);
 			
-			AIChiki->SetMoveDelay(2.5f);
+			AIChicky->SetMoveDelay(2.5f);
 		}
 	}
 }
 
 void ATicTacPawn::EndGame()
 {
-	if (AIChiki != nullptr)
+	if (AIChicky != nullptr)
 	{
-		AIChiki->Destroy();
+		AIChicky->Destroy();
 	}
 
-	if (AIBriki != nullptr)
+	if (AIBricky != nullptr)
 	{
-		AIBriki->Destroy();
+		AIBricky->Destroy();
 	}
 
-	float DelayInSeconds = 2.0f;
-	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, Board, &ATicTacBoard::DelayedDestroy, DelayInSeconds, false);
+	Board->Destroy();
+
 }
 
 void ATicTacPawn::Tick(float DeltaTime)

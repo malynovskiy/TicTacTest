@@ -213,16 +213,7 @@ void ATicTacBoard::HandleMove(int32 index, EPlayer player)
     }
   }
 
-  // Game over condition
-  FText resultString{};
   EGameState gameState = EGameState::NoWin;
-  if (winCondition == EWinCondition::Player1Win)
-    resultString = FText::Format(LOCTEXT("ScoreFmt", "Player 1 wins! Score: {0}"), FText::AsNumber(0));
-  else if (winCondition == EWinCondition::Player2Win)
-    resultString = FText::Format(LOCTEXT("ScoreFmt", "Player 2 wins! Score: {0}"), FText::AsNumber(0));
-  else if (winCondition == EWinCondition::Draw)
-    resultString = FText::FromString("Draw!");
-
   gameState = static_cast<EGameState>(winCondition);
   GameState->SetGameState(gameState);
   OwningPawn->EndGame();

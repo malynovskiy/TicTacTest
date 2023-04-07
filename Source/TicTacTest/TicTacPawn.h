@@ -28,6 +28,6 @@ protected:
 
 	class ATicTacBoard* Board;
 
-	class ATicTacAI* AIChiki; // it should've been Alpha and Bravo, but ... :) 
-	class ATicTacAI* AIBriki;
+	class ATicTacAI* AIChicky = nullptr; // it should've been Alpha and Bravo, but ... :) 
+	class ATicTacAI* AIBricky = nullptr;
 };
