@@ -27,6 +27,7 @@ enum class EGameMode : uint8
 };
 
 DECLARE_DELEGATE_OneParam(FOnGameFinished, EGameState);
+DECLARE_DELEGATE_OneParam(FOnPlayerChanged, EPlayer);
 
 UCLASS()
 class TICTACTEST_API ATicTacGameState : public AGameStateBase
@@ -35,6 +36,7 @@ class TICTACTEST_API ATicTacGameState : public AGameStateBase
 
 public:
   FOnGameFinished OnGameFinished;
+  FOnPlayerChanged OnPlayerChanged;
 
   void SwitchPlayer();
 

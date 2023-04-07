@@ -17,8 +17,11 @@ ATicTacBoard::ATicTacBoard()
   RootComponent = DummyRoot;
 
   PlayerText = CreateDefaultSubobject<UTextRenderComponent>(TEXT("ScoreText0"));
-  PlayerText->SetText(FText::Format(LOCTEXT("ScoreFmt", "Score: {0}"), FText::AsNumber(0)));
-  PlayerText->SetupAttachment(DummyRoot);
+  PlayerText->SetText(FText::Format(LOCTEXT("PlayerNameFmt", "Player{0} is moving..."), FText::AsNumber(1)));
+  PlayerText->SetTextRenderColor(FColor::Yellow);
+  
+  PlayerText->SetRelativeLocation(FVector(0, 0, 0));
+  PlayerText->SetWorldLocationAndRotation(FVector(0.f, -240.f, 1700.f), FRotator(90.f, 0.f, 180.f));
 }
 
 void ATicTacBoard::BeginPlay()
@@ -39,8 +42,14 @@ void ATicTacBoard::BeginPlay()
     return;
   }
 
-  PlayerText->SetRelativeLocation(FVector(-270.0f, 0.f, -1800.f));
-  PlayerText->SetRelativeRotation(FRotator(90.0f, -180.0f, 0.0f));
+  ATicTacGameState* gameState = GetWorld()->GetGameState<ATicTacGameState>();
+  if (gameState == nullptr)
+  {
+    UE_LOG(LogTemp, Error, TEXT("ATicTacGameState is null"));
+    return;
+  }
+
+  gameState->OnPlayerChanged.BindUObject(this, &ATicTacBoard::OnPlayerChanged);
 }
 
 void ATicTacBoard::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -78,17 +87,20 @@ void ATicTacBoard::CreateBlocks()
   const int32 NumBlocks = Size * Size;
   BoardCells.Init(ECell::Empty, NumBlocks);
 
-  const auto computeCellLocation = [this](int32 index) -> FVector
+  FVector2D ViewportSize{};
+  GetWorld()->GetGameViewport()->GetViewportSize(ViewportSize);
+
+  const auto computeCellLocation = [this](int32 index, float xoffset) -> FVector
   {
-    const float XOffset = (index / Size) * BlockSpacing - Size * BlockSpacing / 2 + BlockSpacing / 2;
+    const float XOffset = xoffset + (index / Size) * BlockSpacing - Size * BlockSpacing / 2 + BlockSpacing / 2;
     const float YOffset = (index % Size) * BlockSpacing - Size * BlockSpacing / 2 + BlockSpacing / 2;
 
-    return FVector(XOffset, YOffset, GetActorLocation().Z);
+    return FVector(YOffset, XOffset, GetActorLocation().Z);
   };
 
   for (int32 i = 0; i < NumBlocks; i++)
   {
-    const auto location = computeCellLocation(i);
+    const auto location = computeCellLocation(i, ViewportSize.X/4);
 
     ATicTacBlock* NewBlock = GetWorld()->SpawnActor<ATicTacBlock>(location, FRotator(0, 0, 0));
 
@@ -278,6 +290,11 @@ bool ATicTacBoard::CheckDrawCondition() const
       return false;
   }
   return true;
+}
+
+void ATicTacBoard::OnPlayerChanged(EPlayer player) const
+{
+  PlayerText->SetText(FText::Format(LOCTEXT("PlayerNameFmt", "Player{0} is moving..."), FText::AsNumber(static_cast<int32>(player)+1)));
 }
 
 #undef LOCTEXT_NAMESPACE

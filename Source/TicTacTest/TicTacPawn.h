@@ -17,9 +17,9 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintCallable, Category = "TicTacTest")
-  void StartNewGame(int32 BoardSize, bool isPVE);
+  void StartNewGame(int32 BoardSize, bool isPVE, bool AIsimulation);
 	void EndGame();
-
+	
 protected:
 	void TraceForBlock(const FVector& Start, const FVector& End, bool bDrawDebugHelpers);
 

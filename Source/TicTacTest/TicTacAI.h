@@ -15,7 +15,7 @@ public:
 
 	void SetGameBoard(class ATicTacBoard*);
 	void SetPlayer(EPlayer player) { Player = player; }
-
+	void SetMoveDelay(float delay) { MoveDelay = delay; }
 protected:
 	virtual void BeginPlay() override;
 
@@ -28,6 +28,7 @@ private:
 private:
 	ATicTacGameState* GameState = nullptr;
 	class ATicTacBoard* GameBoard = nullptr;
-
+	
+	float MoveDelay = 1.5f;
 	EPlayer Player = EPlayer::Player2;
 };

@@ -70,6 +70,9 @@ private:
 	EWinCondition CheckWinCondition() const;
 	bool CheckDrawCondition() const;
 
+	void OnPlayerChanged(EPlayer player) const;
+
+private:
 	// Array of cells to calculate win condition more efficiently
 	TArray<ECell> BoardCells;
 

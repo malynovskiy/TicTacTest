@@ -13,24 +13,31 @@ void ATicTacPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void ATicTacPawn::StartNewGame(int32 BoardSize, bool isPVE)
+void ATicTacPawn::StartNewGame(int32 BoardSize, bool isPVE, bool AIsimulation)
 {
   Board = GetWorld()->SpawnActor<ATicTacBoard>(FVector(0.f, 0.f, -140.f), FRotator(0, 90.f, 180.f));
   Board->Initialize(BoardSize);
 	
-	if (ATicTacGameState* gameState = GetWorld()->GetGameState<ATicTacGameState>())
+	ATicTacGameState* gameState = GetWorld()->GetGameState<ATicTacGameState>();
+		if (gameState == nullptr)
+			return;
+	
+	gameState->SetGameMode(isPVE ? EGameMode::PVE : EGameMode::PVP);
+
+	if (isPVE)
 	{
-		gameState->SetGameMode(isPVE ? EGameMode::PVE : EGameMode::PVP);
+		AIChiki = GetWorld()->SpawnActor<ATicTacAI>();
+		AIChiki->SetGameBoard(Board);
+		AIChiki->SetPlayer(EPlayer::Player2);
 
-		if (isPVE)
+		if (AIsimulation)
 		{
-			AIChiki = GetWorld()->SpawnActor<ATicTacAI>();
-			AIChiki->SetGameBoard(Board);
-			AIChiki->SetPlayer(EPlayer::Player2);
-
-      AIBriki = GetWorld()->SpawnActor<ATicTacAI>();
-      AIBriki->SetGameBoard(Board);
-      AIBriki->SetPlayer(EPlayer::Player1);
+			AIBriki = GetWorld()->SpawnActor<ATicTacAI>();
+			AIBriki->SetGameBoard(Board);
+			AIBriki->SetPlayer(EPlayer::Player1);
+			AIBriki->SetMoveDelay(2.0f);
+			
+			AIChiki->SetMoveDelay(2.5f);
 		}
 	}
 }

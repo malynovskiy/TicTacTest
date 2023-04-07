@@ -13,9 +13,8 @@ void ATicTacAI::BeginPlay()
 
   GameState = GetWorld()->GetGameState<ATicTacGameState>();
 
-  float CheckInterval = 0.5f;
   FTimerHandle TimerHandle;
-  GetWorldTimerManager().SetTimer(TimerHandle, this, &ATicTacAI::CheckTurnAndMove, CheckInterval, true);
+  GetWorldTimerManager().SetTimer(TimerHandle, this, &ATicTacAI::CheckTurnAndMove, MoveDelay, true);
 }
 
 void ATicTacAI::SetGameBoard(ATicTacBoard* board)
@@ -52,20 +51,25 @@ int32 ATicTacAI::GetNextMove()
 {
   int32 index = 0;
 
-  // Find a winning move or a blocking move
-  for (int32 i = 0; i < GameBoard->Size; ++i)
+  bool skipWiseCheck = FMath::RandRange(0, 10) > 7;
+  
+  if(!skipWiseCheck)
   {
-    for (int32 j = 0; j < GameBoard->Size; ++j)
+    // Find a winning move or a blocking move
+    for (int32 i = 0; i < GameBoard->Size; ++i)
     {
-      index = i * GameBoard->Size + j;
-      if (!GameBoard->IsCellEmpty(index))
-        continue;
+      for (int32 j = 0; j < GameBoard->Size; ++j)
+      {
+        index = i * GameBoard->Size + j;
+        if (!GameBoard->IsCellEmpty(index))
+          continue;
 
-      if (GameBoard->IsWinningMove(index, EPlayer::Player2))
-        return index;
+        if (GameBoard->IsWinningMove(index, EPlayer::Player2))
+          return index;
 
-      if (GameBoard->IsWinningMove(index, EPlayer::Player1))
-        return index;
+        if (GameBoard->IsWinningMove(index, EPlayer::Player1))
+          return index;
+      }
     }
   }
 

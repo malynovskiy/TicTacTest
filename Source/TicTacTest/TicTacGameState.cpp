@@ -3,6 +3,7 @@
 void ATicTacGameState::SwitchPlayer()
 {
   CurrentPlayer = CurrentPlayer == EPlayer::Player1 ? EPlayer::Player2 : EPlayer::Player1;
+  OnPlayerChanged.ExecuteIfBound(CurrentPlayer);
 }
 
 bool ATicTacGameState::IsAITurn(EPlayer player) const
