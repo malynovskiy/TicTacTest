@@ -24,19 +24,31 @@ void ATicTacPawn::StartNewGame(int32 BoardSize, bool isPVE)
 
 		if (isPVE)
 		{
-			AI = GetWorld()->SpawnActor<ATicTacAI>();
+			AIChiki = GetWorld()->SpawnActor<ATicTacAI>();
+			AIChiki->SetGameBoard(Board);
+			AIChiki->SetPlayer(EPlayer::Player2);
+
+      AIBriki = GetWorld()->SpawnActor<ATicTacAI>();
+      AIBriki->SetGameBoard(Board);
+      AIBriki->SetPlayer(EPlayer::Player1);
 		}
 	}
 }
 
 void ATicTacPawn::EndGame()
 {
-	if (AI != nullptr)
+	if (AIChiki != nullptr)
 	{
-		AI->Destroy();
+		AIChiki->Destroy();
+	}
+	if (AIBriki != nullptr)
+	{
+		AIBriki->Destroy();
 	}
 
-	Board->Destroy();
+	float DelayInSeconds = 2.0f;
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, Board, &ATicTacBoard::DelayedDestroy, DelayInSeconds, false);
 }
 
 void ATicTacPawn::Tick(float DeltaTime)

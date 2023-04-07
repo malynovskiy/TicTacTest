@@ -59,6 +59,9 @@ public:
 
 	inline class ATicTacBlock* GetBlock(int32 index) const { return BoardBlocks[index]; }
 
+	void DelayedDestroy() { Destroy(); }
+
+public:
 	FORCEINLINE class USceneComponent* GetDummyRoot() const { return DummyRoot; }
 	FORCEINLINE class UTextRenderComponent* GetPlayerText() const { return PlayerText; }
 

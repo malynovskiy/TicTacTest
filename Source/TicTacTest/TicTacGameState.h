@@ -46,7 +46,7 @@ public:
 
   inline EPlayer GetCurrentPlayer() const { return CurrentPlayer; }
 
-  bool IsAITurn() const;
+  bool IsAITurn(EPlayer player) const;
   bool IsPlayerTurn() const;
 
 private:

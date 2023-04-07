@@ -13,14 +13,14 @@ void ATicTacAI::BeginPlay()
 
   GameState = GetWorld()->GetGameState<ATicTacGameState>();
 
-  if (ATicTacPawn* ticTacPawn = dynamic_cast<ATicTacPawn*>(GetWorld()->GetFirstPlayerController()->GetPawn()))
-  {
-    GameBoard = ticTacPawn->GetGameBoard();
-  }
-
-  float CheckInterval = 1.0f;
+  float CheckInterval = 0.5f;
   FTimerHandle TimerHandle;
   GetWorldTimerManager().SetTimer(TimerHandle, this, &ATicTacAI::CheckTurnAndMove, CheckInterval, true);
+}
+
+void ATicTacAI::SetGameBoard(ATicTacBoard* board)
+{
+  GameBoard = board;
 }
 
 int32 ATicTacAI::GetRandMove(TArray<int32> possibleMoves)
@@ -40,25 +40,12 @@ int32 ATicTacAI::GetRandMove(TArray<int32> possibleMoves)
 
 void ATicTacAI::CheckTurnAndMove()
 {
-  if (BlockToMove != nullptr || GameState == nullptr || !GameState->IsAITurn())
+  if (GameState == nullptr || !GameState->IsAITurn(Player))
     return;
 
   const int32 cellIndex = GetNextMove();
-  BlockToMove = GameBoard->GetBlock(cellIndex);
-  BlockToMove->Highlight(true);
-
-  float moveDelay = 1.0f;
-  FTimerHandle TimerHandle;
-  GetWorldTimerManager().SetTimer(TimerHandle, this, &ATicTacAI::MakeMove, moveDelay, false);
-}
-
-void ATicTacAI::MakeMove()
-{
-  if (BlockToMove == nullptr)
-    return;
-
-  BlockToMove->HandleClicked(EPlayer::Player2);
-  BlockToMove = nullptr;
+  ATicTacBlock *BlockToMove = GameBoard->GetBlock(cellIndex);
+  BlockToMove->HandleMove(Player);
 }
 
 int32 ATicTacAI::GetNextMove()

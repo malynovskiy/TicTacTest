@@ -57,48 +57,36 @@ void ATicTacBlock::Tick(float DeltaTime)
 
 void ATicTacBlock::BlockClicked(UPrimitiveComponent* ClickedComp, FKey ButtonClicked)
 {
-	HandleClicked();
+	HandlePlayerClick();
 }
 
-void ATicTacBlock::HandleClicked()
+void ATicTacBlock::HandlePlayerClick()
 {
-	// prevent clicking on already occupied blocks
-	if (bIsActive)
-		return;
-	
-	bIsActive = true;
-
 	ATicTacGameState* gameState = GetWorld()->GetGameState<ATicTacGameState>();
 	if (gameState == nullptr)
 	{
 		UE_LOG(LogTemp, Error, TEXT("ATicTacGameState is null"));
-    return;
+		return;
 	}
 
+	if (gameState->IsAITurn(EPlayer::Player2) || bIsActive)
+		return;
+	
 	const EPlayer currentPlayer = gameState->GetCurrentPlayer();
+	bIsActive = true;
 
-	if (currentPlayer == EPlayer::Player1)
-	{
-		BlockMesh->SetMaterial(0, X_Material);
-	}
-	else
-	{
-		BlockMesh->SetMaterial(0, O_Material);
-	}
-
-  if (OwningBoard != nullptr)
-  {
-    OwningBoard->HandleMove(index, currentPlayer);
-  }
+	HandleMove(currentPlayer);
 }
 
-void ATicTacBlock::HandleClicked(EPlayer player)
+void ATicTacBlock::HandleMove(EPlayer player)
 {
 	// prevent clicking on already occupied blocks
-	if (bIsActive)
-		return;
+  bIsActive = true;
 
-	bIsActive = true;
+	if (OwningBoard != nullptr)
+	{
+		OwningBoard->HandleMove(index, player);
+  }
 
 	if (player == EPlayer::Player1)
 	{
@@ -107,11 +95,6 @@ void ATicTacBlock::HandleClicked(EPlayer player)
 	else
 	{
 		BlockMesh->SetMaterial(0, O_Material);
-	}
-
-	if (OwningBoard != nullptr)
-	{
-		OwningBoard->HandleMove(index, player);
 	}
 }
 

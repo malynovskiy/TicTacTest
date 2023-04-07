@@ -185,6 +185,7 @@ void ATicTacBoard::HandleMove(int32 index, EPlayer player)
   }
 
   BoardCells[index] = player == EPlayer::Player1 ? ECell::X : ECell::O;
+  GameState->SwitchPlayer();
 
   EWinCondition winCondition = CheckWinCondition();
 
@@ -196,8 +197,6 @@ void ATicTacBoard::HandleMove(int32 index, EPlayer player)
     }
     else
     {
-      // No win, next player turn
-      GameState->SwitchPlayer();
       return;
     }
   }

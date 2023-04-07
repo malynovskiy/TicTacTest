@@ -20,8 +20,6 @@ public:
   void StartNewGame(int32 BoardSize, bool isPVE);
 	void EndGame();
 
-	class ATicTacBoard* GetGameBoard() const { return Board; }
-
 protected:
 	void TraceForBlock(const FVector& Start, const FVector& End, bool bDrawDebugHelpers);
 
@@ -29,6 +27,7 @@ protected:
 	class ATicTacBlock* CurrentBlockFocus;
 
 	class ATicTacBoard* Board;
-	class ATicTacAI* AI;
 
+	class ATicTacAI* AIChiki; // it should've been Alpha and Bravo, but ... :) 
+	class ATicTacAI* AIBriki;
 };
